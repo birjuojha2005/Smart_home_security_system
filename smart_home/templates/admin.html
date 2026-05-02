@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Security - Admin</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>&#128272; Admin Dashboard</h1>
+            <nav>
+                <a href="admin.html" class="active">Dashboard</a>
+                <a href="camera.html">Camera</a>
+                <a href="index.html">Public View</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="admin-dashboard">
+        <!-- Admin Stats -->
+        <section class="admin-stats-section">
+            <h2>&#128202; System Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-icon">&#128100;</div>
+                    <div class="stat-info"><h3>Total Users</h3><p id="statUsers">0</p></div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon">&#9989;</div>
+                    <div class="stat-info"><h3>Authorized Faces</h3><p id="statFaces">0</p></div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-icon">&#128197;</div>
+                    <div class="stat-info"><h3>Today's Events</h3><p id="statTodayEvents">0</p></div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-icon">&#128276;</div>
+                    <div class="stat-info"><h3>Alerts</h3><p id="statAlerts">0</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Sensors (Admin View) -->
+        <section class="admin-sensors-section">
+            <h2>&#128300; Live Sensor Status</h2>
+            <div class="sensor-grid">
+                <div class="sensor-card"><div class="sensor-icon">&#128293;</div><h3>Flame</h3><p class="sensor-value sensor-safe" id="adminFlame">Normal</p></div>
+                <div class="sensor-card"><div class="sensor-icon">&#127787;&#65039;</div><h3>Smoke</h3><p class="sensor-value sensor-safe" id="adminSmoke">0 ppm</p></div>
+                <div class="sensor-card"><div class="sensor-icon">&#128315;</div><h3>Laser</h3><p class="sensor-value sensor-safe" id="adminLaser">Intact</p></div>
+                <div class="sensor-card"><div class="sensor-icon">&#9728;&#65039;</div><h3>LDR</h3><p class="sensor-value" id="adminLdr">0 lux</p></div>
+                <div class="sensor-card"><div class="sensor-icon">&#128274;</div><h3>Door</h3><p class="sensor-value sensor-safe" id="adminDoor">LOCKED</p></div>
+                <div class="sensor-card"><div class="sensor-icon">&#128276;</div><h3>Buzzer</h3><p class="sensor-value" id="adminBuzzer">OFF</p></div>
+            </div>
+        </section>
+
+        <!-- Tab Navigation -->
+        <section class="admin-tabs-section">
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="users">&#128100; Users</button>
+                <button class="tab-btn" data-tab="faces">&#128100; Faces</button>
+                <button class="tab-btn" data-tab="events">&#128220; Events</button>
+                <button class="tab-btn" data-tab="notifications">&#128233; Notifications</button>
+            </div>
+
+            <!-- Users Tab -->
+            <div class="tab-content active" id="tab-users">
+                <div class="tab-header">
+                    <h3>User Management</h3>
+                    <button class="btn-primary" onclick="openModal('addUserModal')">+ Add User</button>
+                </div>
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+                        <tbody id="usersBody"><tr><td colspan="5" class="empty-state">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Faces Tab -->
+            <div class="tab-content" id="tab-faces">
+                <div class="tab-header">
+                    <h3>Face Management</h3>
+                    <button class="btn-primary" onclick="openModal('addFaceModal')">+ Add Face</button>
+                </div>
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead><tr><th>Name</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
+                        <tbody id="facesBody"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Events Tab -->
+            <div class="tab-content" id="tab-events">
+                <div class="tab-header">
+                    <h3>Security Events</h3>
+                    <span class="status-meta" id="eventsCount">--</span>
+                </div>
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead><tr><th>Time</th><th>Type</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="eventsBody"><tr><td colspan="5" class="empty-state">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div class="tab-content" id="tab-notifications">
+                <div class="tab-header">
+                    <h3>Send Notification</h3>
+                </div>
+                <div class="notify-form">
+                    <div class="form-group">
+                        <label>Recipient</label>
+                        <select id="notifyUser" class="form-input"><option value="">Loading...</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" id="notifySubject" value="Smart Home Alert" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="notifyMsg" rows="4" class="form-input" placeholder="Enter alert message..."></textarea>
+                    </div>
+                    <button class="btn-primary btn-full" onclick="sendNotification()">&#128233; Send Notification</button>
+                    <div class="login-message" id="notifyMessage" style="display:none"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add User Modal -->
+    <div class="modal-overlay" id="addUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <form id="addUserForm">
+                <div class="form-group"><label>Username</label><input type="text" id="newUsername" class="form-input" required></div>
+                <div class="form-group"><label>Email</label><input type="email" id="newEmail" class="form-input" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="newPassword" class="form-input" required></div>
+                <div class="form-group"><label>Role</label>
+                    <select id="newRole" class="form-input"><option value="public">Public</option><option value="admin">Admin</option></select>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Create User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal-overlay" id="editUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group"><label>Username</label><input type="text" id="editUsername" class="form-input" required></div>
+                <div class="form-group"><label>Email</label><input type="email" id="editEmail" class="form-input" required></div>
+                <div class="form-group"><label>New Password (leave blank to keep)</label><input type="password" id="editPassword" class="form-input"></div>
+                <div class="form-group"><label>Role</label>
+                    <select id="editRole" class="form-input"><option value="public">Public</option><option value="admin">Admin</option></select>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Update User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Face Modal -->
+    <div class="modal-overlay" id="addFaceModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Authorized Face</h3>
+                <button class="modal-close" onclick="closeModal('addFaceModal')">&times;</button>
+            </div>
+            <form id="addFaceForm">
+                <div class="form-group"><label>Person's Name</label><input type="text" id="faceName" class="form-input" required></div>
+                <div class="form-group"><label>Authorization Status</label>
+                    <select id="faceAuth" class="form-input"><option value="true">Authorized</option><option value="false">Not Authorized</option></select>
+                </div>
+                <button type="submit" class="btn-primary btn-full">Add Face</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Smart Home Security System - Admin</p>
+    </footer>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

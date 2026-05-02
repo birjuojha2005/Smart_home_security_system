@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Security - Register</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>&#128274; Smart Home Security</h1>
+            <nav>
+                <a href="index.html">Dashboard</a>
+                <a href="login.html">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="login-container">
+        <section class="login-form">
+            <div class="login-header">
+                <div class="login-icon">&#128272;</div>
+                <h2>Create Account</h2>
+                <p>Register to access the security system</p>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Min 6 characters" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Repeat password" required>
+                </div>
+                <div class="form-group">
+                    <label>Account Type</label>
+                    <div class="role-options">
+                        <label class="role-chip">
+                            <input type="radio" name="role" value="admin"> Admin
+                        </label>
+                        <label class="role-chip">
+                            <input type="radio" name="role" value="public" checked> Public User
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" id="registerBtn" class="btn-primary btn-full">Create Account</button>
+            </form>
+            <div class="login-message" id="registerMessage"></div>
+            <p class="login-link">Already have an account? <a href="login.html">Login</a></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Smart Home Security System</p>
+    </footer>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

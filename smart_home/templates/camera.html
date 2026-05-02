@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Security - Live Camera</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>&#128247; Smart Home Security - Camera</h1>
+            <nav>
+                <a href="index.html">Dashboard</a>
+                <a href="camera.html" class="active">Live Camera</a>
+                <a href="admin.html">Admin</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="camera-page">
+        <!-- Active Alarm Banner -->
+        <div id="alarmBanner" style="display:none;background:linear-gradient(135deg,#c0392b,#e74c3c);color:white;padding:1rem;border-radius:10px;text-align:center;margin-bottom:1rem;animation:alertPulse 1s infinite;">
+            <h3 style="margin:0;">&#9888;&#65039; SECURITY ALARM ACTIVE &#9888;&#65039;</h3>
+            <p style="margin:0.3rem 0 0;font-size:0.9rem;opacity:0.9;">Buzzer and LED are ON - Unauthorized activity detected!</p>
+        </div>
+
+        <!-- Camera Feed -->
+        <section class="camera-section">
+            <h2>&#128249; Live Camera Feed</h2>
+            <div class="camera-container">
+                <div class="video-wrapper">
+                    <video id="videoFeed" autoplay playsinline></video>
+                    <div class="camera-overlay">
+                        <div class="camera-status">
+                            <span class="status-dot offline" id="camStatusDot"></span>
+                            <span id="camStatusText">Camera Offline</span>
+                        </div>
+                        <div class="face-detection-box" id="faceBox" style="display:none">
+                            <span class="face-label unauth" id="faceLabel">Unknown</span>
+                        </div>
+                    </div>
+                </div>
+                <canvas id="captureCanvas" style="display:none"></canvas>
+                <div class="camera-controls">
+                    <button class="btn-primary" id="startCamBtn" onclick="startCamera()">&#127909; Start Camera</button>
+                    <button class="btn-danger" id="stopCamBtn" onclick="stopCamera()" disabled>&#9724; Stop Camera</button>
+                    <button class="btn-primary" id="captureBtn" onclick="captureAndDetect()" disabled>&#128247; Detect Face</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detection Result -->
+        <section class="detection-section">
+            <h2>&#128269; Face Detection Result</h2>
+            <div id="detectionResult">
+                <p class="empty-state">Start the camera and click "Detect Face" to analyze</p>
+            </div>
+        </section>
+
+        <!-- Register New Face -->
+        <section class="register-face-section">
+            <h2>&#128100; Register New Face</h2>
+            <div class="register-face-form">
+                <div class="form-row">
+                    <input type="text" id="newFaceName" placeholder="Person's name..." class="form-input">
+                    <select id="newFaceAuth" class="form-input">
+                        <option value="true">Authorized</option>
+                        <option value="false">Unauthorized</option>
+                    </select>
+                    <button class="btn-primary" onclick="registerFaceFromCamera()">Register Face</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detection History -->
+        <section class="history-section">
+            <h2>&#128203; Detection History</h2>
+            <div class="events-list" id="detectionHistory">
+                <p class="empty-state">No detections yet</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Smart Home Security System</p>
+    </footer>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

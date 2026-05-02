@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Security - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>&#128274; Smart Home Security</h1>
+            <nav>
+                <a href="index.html" class="active">Dashboard</a>
+                <a href="camera.html">Live Camera</a>
+                <a href="login.html" id="loginNavBtn">Login</a>
+                <a href="#" id="logoutNavBtn" style="display:none" onclick="logout()">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <!-- System Status -->
+        <section class="security-status-section">
+            <h2>&#128994; System Status</h2>
+            <div class="status-bar">
+                <div class="status-indicator">
+                    <span class="status-dot online" id="systemDot"></span>
+                    <span class="status-text" id="systemText">System Online</span>
+                </div>
+                <div class="status-meta" id="lastUpdated">Last updated: --</div>
+            </div>
+        </section>
+
+        <!-- Live Sensor Readings -->
+        <section class="sensors-section">
+            <h2>&#128300; Live Sensor Readings</h2>
+            <div class="sensor-grid">
+                <div class="sensor-card" id="flameCard">
+                    <div class="sensor-icon">&#128293;</div>
+                    <h3>Flame Sensor</h3>
+                    <p class="sensor-value sensor-safe" id="flameValue">Normal</p>
+                    <div class="sensor-bar"><div class="sensor-bar-fill" id="flameBar" style="width:0%"></div></div>
+                </div>
+                <div class="sensor-card" id="smokeCard">
+                    <div class="sensor-icon">&#127787;&#65039;</div>
+                    <h3>Smoke / MQ-2</h3>
+                    <p class="sensor-value sensor-safe" id="smokeValue">0 ppm</p>
+                    <div class="sensor-bar"><div class="sensor-bar-fill" id="smokeBar" style="width:0%"></div></div>
+                </div>
+                <div class="sensor-card" id="laserCard">
+                    <div class="sensor-icon">&#128315;</div>
+                    <h3>Laser Beam</h3>
+                    <p class="sensor-value sensor-safe" id="laserValue">Intact</p>
+                </div>
+                <div class="sensor-card" id="ldrCard">
+                    <div class="sensor-icon">&#9728;&#65039;</div>
+                    <h3>LDR (Light)</h3>
+                    <p class="sensor-value" id="ldrValue">0 lux</p>
+                    <div class="sensor-bar"><div class="sensor-bar-fill ldr" id="ldrBar" style="width:0%"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hardware Controls -->
+        <section class="controls-section">
+            <h2>&#9881;&#65039; Hardware Controls</h2>
+            <div class="controls-grid">
+                <div class="control-card">
+                    <div class="control-icon">&#128274;</div>
+                    <h3>Door Lock</h3>
+                    <p class="sensor-value sensor-safe" id="doorStatus">LOCKED</p>
+                    <div class="control-buttons">
+                        <button class="btn-primary" onclick="controlDoor('unlock')">&#128275; Unlock</button>
+                        <button class="btn-danger" onclick="controlDoor('lock')">&#128274; Lock</button>
+                    </div>
+                </div>
+                <div class="control-card">
+                    <div class="control-icon">&#128276;</div>
+                    <h3>Buzzer / Alarm</h3>
+                    <p class="sensor-value" id="buzzerStatus">OFF</p>
+                    <div class="control-buttons">
+                        <button class="btn-danger" onclick="controlBuzzer('on')">&#128276; Alarm ON</button>
+                        <button class="btn-secondary" onclick="controlBuzzer('off')">Alarm OFF</button>
+                    </div>
+                </div>
+                <div class="control-card">
+                    <div class="control-icon">&#128161;</div>
+                    <h3>LED Light</h3>
+                    <p class="sensor-value" id="ledStatus">OFF</p>
+                    <div class="control-buttons">
+                        <button class="btn-primary" onclick="controlLED('on')">&#128161; ON</button>
+                        <button class="btn-secondary" onclick="controlLED('off')">OFF</button>
+                    </div>
+                </div>
+                <div class="control-card">
+                    <div class="control-icon">&#127919;</div>
+                    <h3>Servo Motor</h3>
+                    <p class="sensor-value" id="servoStatus">0&deg;</p>
+                    <div class="servo-control">
+                        <input type="range" min="0" max="180" value="0" id="servoSlider" oninput="updateServoDisplay(this.value)">
+                        <button class="btn-primary" onclick="controlServo()">Set Angle</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Cards -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-icon">&#128100;</div>
+                    <div class="stat-info"><h3>Authorized Faces</h3><p id="faceCount">--</p></div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon">&#9989;</div>
+                    <div class="stat-info"><h3>Today's Events</h3><p id="todayEvents">--</p></div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-icon">&#9888;&#65039;</div>
+                    <div class="stat-info"><h3>Alerts</h3><p id="alertCount">0</p></div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-icon">&#128247;</div>
+                    <div class="stat-info"><h3>Cameras</h3><p>1</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Security Events -->
+        <section class="events-section">
+            <h2>&#128220; Recent Security Events</h2>
+            <div class="events-list" id="eventsList">
+                <div class="skeleton-loader"></div>
+                <div class="skeleton-loader"></div>
+                <div class="skeleton-loader"></div>
+            </div>
+        </section>
+
+        <!-- Authorized Faces -->
+        <section class="faces-section">
+            <h2>&#128100; Authorized Persons</h2>
+            <div class="faces-grid" id="facesGrid">
+                <div class="skeleton-loader"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Smart Home Security System</p>
+    </footer>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

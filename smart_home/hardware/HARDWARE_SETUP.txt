@@ -1,0 +1,284 @@
+SMART HOME SECURITY SYSTEM - HARDWARE SETUP GUIDE
+===================================================
+
+SYSTEM ARCHITECTURE:
+-------------------
+    Arduino UNO ----USB Serial----> serial_bridge.py ----HTTP----> Flask Server
+    ESP32-S Camera ----WiFi/HTTP----> Flask Server
+    Web Browser ----HTTP----> Flask Server
+
+The Arduino UNO has NO WiFi. It communicates with the Flask
+server through a USB cable and a Python serial bridge script.
+The ESP32-S camera has built-in WiFi and connects independently.
+
+COMPONENTS REQUIRED:
+-------------------
+1. Arduino UNO R3 (main controller - sensors, actuators, keypad)
+2. ESP32-S3 with OV2640 camera (face recognition - separate board)
+3. USB Cable (Type A to Type B for Arduino UNO)
+4. Flame Sensor (digital output)
+5. MQ-2 Smoke/Gas Sensor (analog output)
+6. LDR Sensor Module (analog output)
+7. Laser Diode Module (5V)
+8. LDR Module (for laser receiver)
+9. Servo Motor (SG90 or MG996R for door lock)
+10. 4x4 Matrix Keypad
+11. LED (any color, for status)
+12. Active Buzzer (5V)
+13. 100uF Capacitor (for servo stability)
+14. Breadboard + Jumper Wires
+15. 5V Power Supply (minimum 2A for ESP32-S3)
+
+NO ESP8266 WiFi module is needed! The Arduino UNO connects
+to your computer via USB and the serial_bridge.py script
+handles all communication with the Flask server.
+
+PIN CONNECTIONS (Arduino UNO R3):
+---------------------------------
+SENSOR PIN        ARDUINO PIN  TYPE         NOTES
+--------          -----------  -----        -----
+Flame Sensor      D2           Digital In   Active LOW usually
+MQ-2 Smoke        A0           Analog In    0-1023 range
+LDR (Light)       A1           Analog In    0-1023 range
+Laser LDR         A2           Analog In    0-1023 range
+
+ACTUATOR          ARDUINO PIN  TYPE         NOTES
+--------          -----------  -----        -----
+Laser Emitter     D3           Digital Out  5V output
+Buzzer            D7           Digital Out  Active buzzer
+LED               D8           Digital Out  Status indicator
+Servo Motor       D9           PWM Out      Door lock mechanism
+
+KEYPAD (4x4)      ARDUINO PIN
+--------------    -----------
+Row 1             D6
+Row 2             D10
+Row 3             D11
+Row 4             D12
+Col 1             D13
+Col 2             A3 (digital pin 17)
+Col 3             A4 (digital pin 18)
+Col 4             A5 (digital pin 19)
+
+WIRING DIAGRAM:
+--------------
+                                Arduino UNO R3
+                             +------------------+
+ Flame Sensor ---- D2 ----->|                  |
+ MQ-2 Sensor  ---- A0 ----->|                  |
+ LDR Sensor   ---- A1 ----->|                  |
+ Laser LDR    ---- A2 ----->|                  |
+                              |                  |
+ Laser Emit   <--- D3 ------|                  |
+ Buzzer       <--- D7 ------|                  |
+ LED          <--- D8 ------|                  |
+ Servo Motor  <--- D9 ------|                  |
+                              |                  |
+ Keypad R1    ---- D6 ----->|                  |
+ Keypad R2    ---- D10 ---->|                  |
+ Keypad R3    ---- D11 ---->|                  |
+ Keypad R4    ---- D12 ---->|                  |
+ Keypad C1    <--- D13 -----|                  |
+ Keypad C2    <--- A3 ------|                  |
+ Keypad C3    <--- A4 ------|                  |
+ Keypad C4    <--- A5 ------|                  |
+                              +--------+---------+
+                                       |
+                                  USB Cable to PC
+                                       |
+                                  serial_bridge.py
+                                       |
+                                   Flask Server
+
+ESP32-S3 Camera (Separate board with own WiFi):
+- Flash esp32s_camera.ino to the ESP32-S3
+- Connect OV2640 camera module
+- Power with external 5V supply (min 2A)
+- Camera captures and sends images to Flask server every 5 seconds
+
+STEP-BY-STEP SETUP:
+-------------------
+
+STEP 1: Install Arduino IDE
+1. Download Arduino IDE from https://www.arduino.cc/en/software
+2. Arduino UNO support is pre-installed (Tools > Board > Arduino UNO)
+
+STEP 2: Install Arduino Libraries
+In Arduino IDE, go to Sketch > Include Library > Manage Libraries:
+- "Keypad" by Mark Stanley and Alexander Brevig
+- "Servo" (built-in with Arduino IDE)
+
+STEP 3: Wire the Arduino UNO Circuit
+1. Place Arduino UNO on breadboard
+2. Connect all sensors to their pins (see pin table above)
+3. Connect actuators (buzzer, LED, servo, laser)
+4. Connect 4x4 keypad (8 wires to D6, D10-D13, A3-A5)
+5. Add 100uF capacitor across servo power pins (prevents jitter)
+6. Connect Arduino UNO to computer via USB cable
+
+STEP 4: Upload Arduino Code
+1. Open hardware/smart_home_arduino_uno.ino in Arduino IDE
+2. Select Board: "Arduino UNO"
+3. Select the correct COM port (check Device Manager on Windows)
+4. Click Upload
+5. Open Serial Monitor at 9600 baud to verify:
+   - Should show "Smart Home Security System"
+   - Should show "System ready!"
+   - Should show sensor data every 3 seconds
+
+STEP 5: Install ESP32 Board Support (for ESP32-S3 camera)
+1. In Arduino IDE, go to File > Preferences
+2. Add this URL to "Additional Board Manager URLs":
+   https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+3. Go to Tools > Board > Boards Manager
+4. Search "ESP32" and install "esp32 by Espressif Systems"
+
+STEP 6: Upload ESP32-S3 Camera Code
+1. Open hardware/esp32s_camera.ino in Arduino IDE
+2. Update WiFi credentials and server IP:
+   const char* WIFI_SSID = "YOUR_WIFI_SSID";
+   const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+   const char* SERVER_URL = "http://YOUR_PC_IP:5000";
+3. Select Board: "ESP32S3 Dev Module"
+4. Set the following board options:
+   - Flash Size: 4MB (or 8MB/16MB depending on your board)
+   - Partition Scheme: Default 4MB with spiffs (or Huge APP)
+   - PSRAM: Enabled (if your board has PSRAM)
+5. Connect ESP32-S3 via USB cable
+6. Click Upload
+7. Open Serial Monitor at 115200 baud to verify:
+   - Should show "Camera initialized successfully!"
+   - Should show "WiFi connected!"
+   - Should show captured image sizes every 5 seconds
+
+NOTE: If camera init fails, you may need to adjust pin definitions
+in esp32s_camera.ino based on your specific ESP32-S3 board model.
+Two common configurations are provided in the code (ESP32-S3-EYE
+and generic ESP32-S3-WROOM). Uncomment the correct one.
+
+STEP 7: Set Up Flask Server
+1. Open a terminal:
+2. cd e:\DevSummit2026\smart_home
+3. pip install -r requirements.txt
+4. Update .env file with your MongoDB Atlas and SMTP credentials
+5. python app.py
+6. Server runs on http://0.0.0.0:5000
+
+STEP 8: Start Serial Bridge
+1. Open a NEW terminal (keep Flask server running in the first one)
+2. cd e:\DevSummit2026\smart_home\hardware
+3. Run the bridge:
+   python serial_bridge.py --port COM3
+   (Replace COM3 with your Arduino's port from Device Manager)
+4. The bridge will auto-detect the Arduino port if possible
+5. You should see:
+   "Connected to Arduino on COM3 at 9600 baud"
+   "Bridge active: Arduino <--> http://localhost:5000"
+   Sensor readings appearing every 3 seconds
+
+STEP 9: Test the System
+1. Open browser: http://localhost:5000
+2. Login as admin (admin/admin123)
+3. Verify sensor readings appear on dashboard
+4. Test hardware controls (door, buzzer, LED, servo)
+5. Test camera page for face recognition
+6. Test keypad with code "1234"
+
+DEFAULT KEYPAD CODE: 1234
+(Change in app.py keypad_input function)
+
+KEYPAD FUNCTIONS:
+- Keys 0-9: Enter code digits
+- #: Submit code
+- *: Clear input
+- A: Lock door
+- B: Unlock door
+- C: Toggle alarm
+- D: Toggle LED
+
+SENSOR THRESHOLDS (adjust in smart_home_arduino_uno.ino):
+- MQ2_THRESHOLD: 200 (smoke level, 0-1023 range on Arduino)
+- LDR_THRESHOLD: 300 (light level, 0-1023 range on Arduino)
+- LASER_THRESHOLD: 100 (laser LDR, lower = beam broken)
+
+NOTE: Arduino UNO analog reads are 10-bit (0-1023),
+NOT 12-bit (0-4095) like ESP32. Thresholds are lower!
+
+SERIAL PROTOCOL (Arduino <-> Python Bridge):
+---------------------------------------------
+Arduino sends:
+  SENSORS:{"flame":false,"smoke":false,"smoke_level":150,...}
+  KEYPAD:1234
+  # Debug message (ignored by bridge)
+
+Python sends:
+  CMD:DOOR:1       (1=unlock, 0=lock)
+  CMD:BUZZER:1     (1=on, 0=off)
+  CMD:LED:1        (1=on, 0=off)
+  CMD:SERVO:90     (angle 0-180)
+  CMD:KEYPAD_OK:1  (code accepted by server)
+  CMD:KEYPAD_FAIL:0 (code rejected by server)
+
+SERIAL BRIDGE OPTIONS:
+  python serial_bridge.py --port COM3       # Specify port
+  python serial_bridge.py --baud 9600       # Specify baud rate
+  python serial_bridge.py --server http://localhost:5000  # Server URL
+  python serial_bridge.py                    # Auto-detect port
+
+TROUBLESHOOTING:
+- Arduino not detected:
+  * Check USB cable connection
+  * Check Device Manager (Windows) for COM port
+  * Try different USB port or cable
+  * Install CH340/CP2102 driver if using clone Arduino
+
+- Serial bridge won't connect:
+  * Make sure Arduino is plugged in and powered on
+  * Close Arduino IDE Serial Monitor (it locks the port)
+  * Check the correct COM port: python -m serial.tools.list_ports
+  * Try: python serial_bridge.py --port COM3
+
+- Sensor readings not appearing on website:
+  * Make sure Flask server is running (Step 7)
+  * Make sure serial bridge is running (Step 8)
+  * Check serial bridge console for error messages
+  * Verify Arduino Serial Monitor shows sensor data
+
+- ESP32-S3 camera not working:
+  * Check OV2640 camera ribbon cable connection
+  * Ensure correct board selected ("ESP32S3 Dev Module")
+  * Try different camera pin definitions in the code
+  * Use external 5V 2A power supply (not USB for power)
+  * Check WiFi credentials in the code
+
+- ESP32-S3 camera init fails:
+  * Check camera pin definitions match your board
+  * Try flipping the camera ribbon cable
+  * Some boards need PSRAM enabled in board settings
+  * Reduce frame size in the code if memory issues
+
+- Keypad not working:
+  * Check all 8 wires are connected properly
+  * A3/A4/A5 work as digital pins 17/18/19
+  * D13 has built-in LED but still works for keypad
+
+- Servo jittering:
+  * Add 100uF capacitor across servo power pins
+  * Ensure adequate power supply for servo
+
+- MQ-2 sensor readings always high:
+  * MQ-2 sensor needs 1-2 minutes warm-up time
+  * Calibrate MQ2_THRESHOLD based on actual readings
+
+RUNNING THE SYSTEM (Quick Start):
+---------------------------------
+Terminal 1 (Flask Server):
+  cd e:\DevSummit2026\smart_home
+  python app.py
+
+Terminal 2 (Serial Bridge):
+  cd e:\DevSummit2026\smart_home\hardware
+  python serial_bridge.py
+
+Browser:
+  http://localhost:5000
